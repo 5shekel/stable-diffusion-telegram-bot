@@ -7,6 +7,7 @@ import base64
 from PIL import Image, PngImagePlugin
 from pyrogram import Client, filters
 from pyrogram.types import *
+from dotenv import load_dotenv
 
 # Done! Congratulations on your new bot. You will find it at 
 # t.me/gootmornbot
@@ -17,12 +18,12 @@ from pyrogram.types import *
 
 # For a description of the Bot API, see this page: https://core.telegram.org/bots/api
 
+load_dotenv()
 API_ID = os.environ.get("API_ID", None) 
 API_HASH = os.environ.get("API_HASH", None) 
 TOKEN = os.environ.get("TOKEN", None) 
 SD_URL = os.environ.get("SD_URL", None) 
 print(SD_URL)
-
 app = Client(
     "stable",
     api_id=API_ID,
@@ -45,9 +46,8 @@ def draw(client, message):
 
     r = requests.post(url=f'{SD_URL}/sdapi/v1/txt2img', json=payload).json()
 
-    # save the image to a file
-
-    def genr(): # generate random string
+    # explaination
+    def genr():
         chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         chars1 = "1234564890"
         gen1 = random.choice(chars)
@@ -83,7 +83,7 @@ def draw(client, message):
         K.delete()
 
 
-# get the models, choose one, and set it as the model checkpoint
+
 @app.on_message(filters.command(["getmodels"]))
 async def get_models(client, message):
     response = requests.get(url=f'{SD_URL}/sdapi/v1/sd-models')
@@ -121,7 +121,7 @@ async def process_callback(client, callback_query):
         await callback_query.message.reply_text("Error setting options")
 
 
-# start the bot
+
 @app.on_message(filters.command(["start"], prefixes=["/", "!"]))
 async def start(client, message):
     # Photo = "https://i.imgur.com/79hHVX6.png"
