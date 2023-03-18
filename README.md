@@ -1,10 +1,37 @@
 # AI Powered Art in a Telegram Bot!
 
+this is a txt2img bot running on tami telegram channel
+
+# How to
+
+supported invocation:  
+`/draw <text>` - send prompt text to the bot and it will draw an image  
+you can add `negative_prompt` using `ng[<text>]` 
+ 
+examples:  
+`/draw a city street`  
+and without people  
+`/draw a city street ng[people]`  
+
+to change the model use:  
+`/getmodels` - to get a list of models and then click to set it. 
+
+
+
+
+
 ## Setup
 
 Install requirements
 
-`pip install -r requirements.txt`
+```bash
+conda create -n sdw python=3.8
+conda activate sdw
+pip install -r requirements.txt
+```
+(note: conda is not strictly necessary, but it is recommended)
+
+## Original readme
 
 My Bot uses [Automatic1111's WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) as the backend.
 Follow the directions on their repo for setup instructions.
@@ -25,8 +52,5 @@ Now, you can run the bot
 
 `python main.py`
 
-### Any questions or need help? Come hop on by to our Telegram Group!
-
-[Otakatsu Chat](https://t.me/otakatsu_chat)
 
 
