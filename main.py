@@ -42,11 +42,31 @@ def draw(client, message):
 
     K = message.reply_text("Please Wait 10-15 Second")
 
-    payload = {"prompt": msg}
+    prompt = msg
+    negative_prompt = "porn, lowres, low resolution, bad resolution, bad, poor quality, bad quality, blurry, bad art, incomplete, logo, signature, text, jpeg artifacts, compression artifacts,child, childish"
 
+    # Look for negative prompt in brackets after "NG" in the message
+    ng_index = msg.find("ng" or "NG")
+    if ng_index != -1:
+        bracket_start_index = msg.find("[", ng_index)
+        bracket_end_index = msg.find("]", ng_index)
+        if bracket_start_index != -1 and bracket_end_index != -1:
+            new_negative_prompt = msg[bracket_start_index+1:bracket_end_index]
+            if negative_prompt == "":
+                negative_prompt = new_negative_prompt
+            else:
+                negative_prompt = f"{negative_prompt}, {new_negative_prompt}"
+            prompt = msg[:ng_index] + msg[bracket_end_index+1:]
+        else:
+            prompt = msg[:ng_index]
+
+    payload = {"prompt": prompt}
+    if negative_prompt != "":
+        payload["negative_prompt"] = negative_prompt
+
+    print(payload)
     r = requests.post(url=f'{SD_URL}/sdapi/v1/txt2img', json=payload).json()
 
-    # explaination
     def genr():
         chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         chars1 = "1234564890"
@@ -62,7 +82,7 @@ def draw(client, message):
         gen10 = random.choice(chars1)
         return f"{message.from_user.id}-MOE{gen1}{gen2}{gen3}{gen4}{gen5}{gen6}{gen7}{gen8}{gen9}{gen10}"
     
-    word=genr()
+    word = genr()
     for i in r['images']:
         image = Image.open(io.BytesIO(base64.b64decode(i.split(",", 1)[0])))
 
@@ -79,7 +99,7 @@ def draw(client, message):
             caption=
             f"Prompt - **{msg}**\n **[{message.from_user.first_name}-Kun](tg://user?id={message.from_user.id})**"
         )
-        os.remove(f"{word}.png")
+        # os.remove(f"{word}.png")
         K.delete()
 
 
