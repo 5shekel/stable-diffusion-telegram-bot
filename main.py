@@ -43,7 +43,7 @@ def draw(client, message):
     K = message.reply_text("Please Wait 10-15 Second")
 
     prompt = msg
-    negative_prompt = "porn, lowres, low resolution, bad resolution, bad, poor quality, bad quality, blurry, bad art, incomplete, logo, signature, text, jpeg artifacts, compression artifacts,child, childish"
+    negative_prompt = "lowres, low resolution, bad resolution, bad, poor quality, bad quality, blurry, bad art, incomplete, logo, signature, text, jpeg artifacts, compression artifacts,child, childish"
 
     # Look for negative prompt in brackets after "NG" in the message
     ng_index = msg.find("ng" or "NG")
