@@ -36,7 +36,7 @@ def slice_positive_negative(string):
         return positive, negative
     else:
         return string, "null"  # if we are missing the ng bad thing happen....
-
+        #POSSIBLE NG [[[[[[[[[[lowres, low resolution, bad resolution, bad, poor quality, bad quality, blurry, bad art, incomplete, logo, signature, text, jpeg artifacts, compression artifacts,child, childish]]]]]]]]]]
 
 @app.on_message(filters.command(["draw"]))
 def draw(client, message):
