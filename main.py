@@ -28,7 +28,7 @@ app = Client("stable", api_id=API_ID, api_hash=API_HASH, bot_token=TOKEN)
 
 
 def slice_positive_negative(string):
-    delimiter = "ng"
+    delimiter = "ng:"
     if delimiter in string:
         index = string.index(delimiter)
         positive = string[:index].rstrip()
@@ -43,7 +43,7 @@ def draw(client, message):
     msgs = message.text.split(" ", 1)
     if len(msgs) == 1:
         message.reply_text(
-            "Format :\n/draw < text to image >\nng < negative (optional) >"
+            "Format :\n/draw < text to image >\nng: < negative (optional) >"
         )
         return
 
