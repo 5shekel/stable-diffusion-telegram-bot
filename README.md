@@ -7,11 +7,14 @@ this is a txt2img bot running on tami telegram channel
 supported invocation:  
 `/draw <text>` - send prompt text to the bot and it will draw an image  
 you can add `negative_prompt` using `ng: <text>` 
+you can add `sampeling steps` using `steps: <text>` ☻
  
 examples:  
 `/draw a city street`  
 and without people  
 `/draw a city street ng: people`  
+with more steps  
+`/draw a city street ng: people steps: 50`  
 
 to change the model use:  
 `/getmodels` - to get a list of models and then click to set it. 
