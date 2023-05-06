@@ -1,6 +1,7 @@
 import json
 import requests
 import io
+import re
 import os
 import uuid
 import base64
@@ -26,48 +27,98 @@ SD_URL = os.environ.get("SD_URL", None)
 print(SD_URL)
 app = Client("stable", api_id=API_ID, api_hash=API_HASH, bot_token=TOKEN)
 
-#default params
+# default params
 steps_value_default = 40
 
-def process_input_string(string):
-    ng_delimiter = "ng:"
-    steps_delimiter = "steps:"
-    
-    ng_index = string.find(ng_delimiter)
-    steps_index = string.find(steps_delimiter)
-    
-    if ng_index != -1 and steps_index != -1:
-        if ng_index < steps_index:
-            positive = string[:ng_index].strip()
-            negative = string[ng_index + len(ng_delimiter):steps_index].strip()
-            steps_str = string[steps_index + len(steps_delimiter):].strip().split()[0]
+
+def parse_input(input_string):
+    default_payload = {
+        "prompt": "",
+        "negative_prompt": "",
+        "controlnet_input_image": [],
+        "controlnet_mask": [],
+        "controlnet_module": "",
+        "controlnet_model": "",
+        "controlnet_weight": 1,
+        "controlnet_resize_mode": "Scale to Fit (Inner Fit)",
+        "controlnet_lowvram": False,
+        "controlnet_processor_res": 64,
+        "controlnet_threshold_a": 64,
+        "controlnet_threshold_b": 64,
+        "controlnet_guidance": 1,
+        "controlnet_guessmode": True,
+        "enable_hr": False,
+        "denoising_strength": 0.5,
+        "hr_scale": 1.5,
+        "hr_upscale": "Latent",
+        "seed": -1,
+        "subseed": -1,
+        "subseed_strength": -1,
+        "sampler_index": "",
+        "batch_size": 1,
+        "n_iter": 1,
+        "steps": 20,
+        "cfg_scale": 7,
+        "width": 512,
+        "height": 512,
+        "restore_faces": True,
+        "override_settings": {},
+        "override_settings_restore_afterwards": True,
+    }
+    # Initialize an empty payload with the 'prompt' key
+    payload = {"prompt": ""}
+
+    # Check if the input_string starts with "/draw "
+    prompt = []
+
+    # Find all occurrences of keys (words ending with a colon)
+    matches = re.finditer(r"(\w+):", input_string)
+    last_index = 0
+
+    # Iterate over the found keys
+    for match in matches:
+        key = match.group(1)
+        value_start_index = match.end()
+
+        # If there's text between the last key and the current key, add it to the prompt
+        if last_index != match.start():
+            prompt.append(input_string[last_index : match.start()].strip())
+        last_index = value_start_index
+
+        # Check if the key is in the default payload
+        if key in default_payload:
+            # Extract the value for the current key
+            value_end_index = re.search(
+                r"(?=\s+\w+:|$)", input_string[value_start_index:]
+            ).start()
+            value = input_string[
+                value_start_index : value_start_index + value_end_index
+            ].strip()
+
+            # Check if the default value for the key is an integer
+            if isinstance(default_payload[key], int):
+                # If the value is a valid integer, store it as an integer in the payload
+                if value.isdigit():
+                    payload[key] = int(value)
+            else:
+                # If the default value for the key is not an integer, store the value as is in the payload
+                payload[key] = value
+
+            last_index += value_end_index
         else:
-            positive = string[:steps_index].strip()
-            negative = string[steps_index + len(steps_delimiter):ng_index].strip()
-            steps_str = string[ng_index + len(ng_delimiter):].strip().split()[0]
-    elif ng_index != -1:
-        positive = string[:ng_index].strip()
-        negative = string[ng_index + len(ng_delimiter):].strip()
-        steps_str = None
-    elif steps_index != -1:
-        positive = string[:steps_index].strip()
-        negative = None
-        steps_str = string[steps_index + len(steps_delimiter):].strip().split()[0]
-    else:
-        positive = string.strip()
-        negative = None
-        steps_str = None
+            # If the key is not in the default payload, add it to the prompt
+            prompt.append(f"{key}:")
 
-    try:
-        steps_value = int(steps_str)
-        #limit steps to range
-        if not 1 <= steps_value <= 70:
-            steps_value = steps_value_default
-    except (ValueError, TypeError):
-        steps_value = None
-    
+    # Join the prompt words and store it in the payload
+    payload["prompt"] = " ".join(prompt)
 
-    return positive, negative, steps_value
+    # If the prompt is empty, return an empty dictionary
+    if not payload["prompt"]:
+        return {}
+
+    # Return the final payload
+    return payload
+
 
 @app.on_message(filters.command(["draw"]))
 def draw(client, message):
@@ -78,19 +129,10 @@ def draw(client, message):
         )
         return
 
-    positive, negative, steps_value = process_input_string(msgs[1])
-    payload = {
-        "prompt": positive,
-    }
-    if negative is not None:
-        payload["negative_prompt"] = negative
-    if steps_value is not None:
-        payload["steps"] = steps_value
-
+    payload = parse_input(msgs[1])
     print(payload)
 
     # The rest of the draw function remains unchanged
-
 
     K = message.reply_text("Please Wait 10-15 Second")
     r = requests.post(url=f"{SD_URL}/sdapi/v1/txt2img", json=payload).json()
@@ -111,15 +153,20 @@ def draw(client, message):
         pnginfo.add_text("parameters", response2.json().get("info"))
         image.save(f"{word}.png", pnginfo=pnginfo)
 
+        info_dict = response2.json()
+        seed_value = info_dict['info'].split(", Seed: ")[1].split(",")[0]
+        # print(seed_value)
+
+        caption = f"**[{message.from_user.first_name}-Kun](tg://user?id={message.from_user.id})**\n\n"
+        for key, value in payload.items():
+            caption += f"{key.capitalize()} - **{value}**\n"
+        caption += f"Seed - **{seed_value}**\n"
+
         message.reply_photo(
-        photo=f"{word}.png",
-        caption=(
-            f"Prompt - **{positive}**\n"
-            f"Negative Prompt - **{negative if negative is not None else 'None'}**\n"
-            f"Steps - **{steps_value if steps_value != steps_value_default else 'Default'}**\n"
-            f"**[{message.from_user.first_name}-Kun](tg://user?id={message.from_user.id})**"
-        ),
-)
+            photo=f"{word}.png",
+            caption=caption,
+        )
+
 
         # os.remove(f"{word}.png")
         K.delete()
