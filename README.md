@@ -1,6 +1,6 @@
 # AI Powered Art in a Telegram Bot!
 
-this is a txt2img bot to converse with SD bot [API](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API) running on tami telegram channel
+this is a txt2img bot to converse with SDweb bot [API](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API) running on tami telegram channel
 
 # How to
 
