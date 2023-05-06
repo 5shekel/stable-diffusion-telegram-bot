@@ -68,7 +68,6 @@ def parse_input(input_string):
     # Initialize an empty payload with the 'prompt' key
     payload = {"prompt": ""}
 
-    # Check if the input_string starts with "/draw "
     prompt = []
 
     # Find all occurrences of keys (words ending with a colon)
@@ -112,9 +111,9 @@ def parse_input(input_string):
     # Join the prompt words and store it in the payload
     payload["prompt"] = " ".join(prompt)
 
-    # If the prompt is empty, return an empty dictionary
+    # If the prompt is empty, set the input string as the prompt
     if not payload["prompt"]:
-        return {}
+        payload["prompt"] = input_string.strip()
 
     # Return the final payload
     return payload
@@ -152,6 +151,9 @@ def draw(client, message):
         pnginfo = PngImagePlugin.PngInfo()
         pnginfo.add_text("parameters", response2.json().get("info"))
         image.save(f"{word}.png", pnginfo=pnginfo)
+
+        # Add a flag to check if the user provided a seed value
+        user_provided_seed = "seed" in payload
 
         info_dict = response2.json()
         seed_value = info_dict['info'].split(", Seed: ")[1].split(",")[0]
