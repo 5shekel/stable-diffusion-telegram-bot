@@ -7,8 +7,21 @@ this is a txt2img bot to converse with SDweb bot [API](https://github.com/AUTOMA
 supported invocation:  
 `/draw <text>` - send prompt text to the bot and it will draw an image  
 you can add `negative_prompt` using `ng: <text>`  
-you can add `denoised intermediate steps` using `steps: <text>` 
+you can add `denoised intermediate steps` using `steps: <text>`  
 
+basicly anything the `/controlnet/txt2img` API payload supports  
+like, 
+```json
+{
+  "prompt": "",
+  "negative_prompt": "",
+  "denoising_strength": 0.5,
+  "seed": -1,
+  "n_iter": 1,
+  "steps": 20,
+  "cfg_scale": 7
+}
+```
 examples:  
 `/draw a city street`  
 and without people  
