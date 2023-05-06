@@ -76,7 +76,7 @@ def parse_input(input_string):
 
     # Iterate over the found keys
     for match in matches:
-        key = match.group(1)
+        key = match.group(1).lower()  # Convert the key to lowercase
         value_start_index = match.end()
 
         # If there's text between the last key and the current key, add it to the prompt
